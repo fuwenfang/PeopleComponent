@@ -72,11 +72,23 @@
 	var PeopleSearch = React.createClass({
 	  displayName: 'PeopleSearch',
 
+	  handleKeyDowm: function handleKeyDowm(e) {
+	    if (e.keyCode == 20) {
+
+	      var searchtext = this.refs.searchtext.value;
+	      if (!searchtext) {
+	        return;
+	      } else {
+	        this.props.handlePeopleSearchCon(searchtext);
+	      }
+	    }
+	    return;
+	  },
 	  render: function render() {
 	    return React.createElement(
 	      'div',
 	      { className: 'mbox784_textwrap' },
-	      React.createElement('textarea', { id: 'textarea1', rows: '1', className: 'M01text' })
+	      React.createElement('textarea', { id: 'textarea1', rows: '1', className: 'M01text', ref: 'searchtext', onKeyDown: this.handleKeyDowm })
 	    );
 	  }
 	});
@@ -139,7 +151,7 @@
 	      'div',
 	      { className: 'mbox784' },
 	      React.createElement(PeopleTitle, null),
-	      React.createElement(PeopleSearch, null),
+	      React.createElement(PeopleSearch, { handlePeopleSearchCon: this.props.handlePeopleSearch }),
 	      React.createElement(PeopleList, { peopleData: this.props.peopleData })
 	    );
 	  }
@@ -153,6 +165,7 @@
 	      url: this.props.url,
 	      dataType: 'json',
 	      cache: false,
+	      data: "",
 	      success: function (data) {
 	        this.setState({ data: data });
 	      }.bind(this),
@@ -160,6 +173,41 @@
 	        console.error(this.props.url, status, err.toString());
 	      }.bind(this)
 	    });
+	  },
+	  searchDataFromServer: function searchDataFromServer(text) {
+	    $.ajax({
+	      url: "search.json",
+	      dataType: 'json',
+	      cache: false,
+	      data: { text: text },
+	      success: function (data) {
+	        this.setState({ data: data });
+	      }.bind(this),
+	      error: function (xhr, status, err) {
+	        console.error(this.props.url, status, err.toString());
+	      }.bind(this)
+	    });
+	  },
+	  handleScroll: function handleScroll() {
+	    var scroll_height = ReactDOM.findDOMNode(this.refs.bomBox).scrollHeight;
+	    var win_height = ReactDOM.findDOMNode(this.refs.bomBox).clientHeight;
+	    var scroll_top = ReactDOM.findDOMNode(this.refs.bomBox).scrollTop;
+	    var oldPeoples = this.state.data;
+	    if (scroll_height - win_height - scroll_top <= 0) {
+	      $.ajax({
+	        url: "pagetwo.json",
+	        dataType: 'json',
+	        cache: false,
+	        data: "",
+	        success: function (data) {
+	          var newPeoples = oldPeoples.concat(data);
+	          this.setState({ data: newPeoples });
+	        }.bind(this),
+	        error: function (xhr, status, err) {
+	          console.error(this.props.url, status, err.toString());
+	        }.bind(this)
+	      });
+	    }
 	  },
 	  getInitialState: function getInitialState() {
 	    return { data: [] };
@@ -170,11 +218,12 @@
 	  render: function render() {
 	    return React.createElement(
 	      'div',
-	      { className: 'mbox_BombBox' },
-	      React.createElement(PeopleCon, { peopleData: this.state.data })
+	      { className: 'mbox_BombBox', onScroll: this.handleScroll, ref: 'bomBox' },
+	      React.createElement(PeopleCon, { peopleData: this.state.data, handlePeopleSearch: this.searchDataFromServer })
 	    );
 	  }
 	});
+
 	ReactDOM.render(React.createElement(PeopleBox, { url: 'comments.json' }), document.getElementById('content'));
 
 /***/ },

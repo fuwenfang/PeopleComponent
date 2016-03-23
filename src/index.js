@@ -17,10 +17,22 @@ var PeopleTitle = React.createClass({
 });
 
 var PeopleSearch = React.createClass({
+  handleKeyDowm:function(e){
+    if(e.keyCode == 20){
+
+      var searchtext = this.refs.searchtext.value;
+      if(!searchtext){
+        return;
+      }else{
+        this.props.handlePeopleSearchCon(searchtext);
+      }
+    }
+    return;
+  },
   render:function(){
     return (
         <div className="mbox784_textwrap">
-          <textarea id="textarea1" rows="1" className="M01text"></textarea>
+          <textarea id="textarea1" rows="1" className="M01text" ref = "searchtext"  onKeyDown = {this.handleKeyDowm}></textarea>
         </div>
     )
   }
@@ -61,7 +73,7 @@ var PeopleCon = React.createClass({
     return (
       <div className = "mbox784">
         <PeopleTitle />
-        <PeopleSearch/>
+        <PeopleSearch handlePeopleSearchCon = {this.props.handlePeopleSearch}/>
         <PeopleList peopleData = {this.props.peopleData}/>
       </div>
     )
@@ -74,6 +86,7 @@ var PeopleBox = React.createClass({
       url: this.props.url,
       dataType: 'json',
       cache: false,
+      data:"",
       success: function(data) {
         this.setState({data: data});
       }.bind(this),
@@ -81,6 +94,42 @@ var PeopleBox = React.createClass({
         console.error(this.props.url, status, err.toString());
       }.bind(this)
     });
+  },
+  searchDataFromServer:function(text){
+    $.ajax({
+      url: "search.json",
+      dataType: 'json',
+      cache: false,
+      data:{text},
+      success: function(data) {
+        this.setState({data: data});
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(this.props.url, status, err.toString());
+      }.bind(this)
+    });
+  },
+  handleScroll:function(){
+      var scroll_height = ReactDOM.findDOMNode(this.refs.bomBox).scrollHeight;
+      var  win_height = ReactDOM.findDOMNode(this.refs.bomBox).clientHeight;
+      var scroll_top = ReactDOM.findDOMNode(this.refs.bomBox).scrollTop;
+      var oldPeoples = this.state.data;
+      if ((scroll_height - win_height - scroll_top) <=0) {
+          $.ajax({
+            url: "pagetwo.json",
+            dataType: 'json',
+            cache: false,
+            data:"",
+            success: function(data) {
+              var newPeoples = oldPeoples.concat(data);
+              this.setState({data: newPeoples});            
+            }.bind(this),
+            error: function(xhr, status, err) {
+              console.error(this.props.url, status, err.toString());
+            }.bind(this)
+          });
+          
+      }
   },
   getInitialState: function() {
     return {data: []};
@@ -90,13 +139,16 @@ var PeopleBox = React.createClass({
   },
   render: function() {
     return (
-      <div className="mbox_BombBox" >
-        <PeopleCon peopleData = {this.state.data}/>
+      <div className="mbox_BombBox" onScroll = {this.handleScroll} ref = "bomBox">
+        <PeopleCon peopleData = {this.state.data} handlePeopleSearch = {this.searchDataFromServer}/>
       </div>
     );
   }
 });
+
+
+
 ReactDOM.render(
-  <PeopleBox url = "comments.json"/>,
+  <PeopleBox url = "comments.json" />,
   document.getElementById('content')
 );

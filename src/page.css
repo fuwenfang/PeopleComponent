@@ -1,6 +1,10 @@
 /* CSS Document */
 /*筛选弹出框begin*/
-.mbox_BombBox{ background:#fff; width:860px; margin:10px auto;}
+#content{    
+	overflow: hidden;
+}
+.mbox_BombBox{ background:#fff; width:860px; margin:10px auto;height: 350px;
+    overflow-y: auto;}
 .mbox784{ width:820px; margin:0 auto; padding:20px 0px;}
 .mbox_BombBoxList01{width:810px;border: 1px solid #dcdcdc;padding-left: 10px;padding-top: 10px;}
 .m_list02{ width:793px; }
