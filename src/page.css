@@ -1,0 +1,27 @@
+/* CSS Document */
+/*筛选弹出框begin*/
+.mbox_BombBox{ background:#fff; width:860px; margin:10px auto;}
+.mbox784{ width:820px; margin:0 auto; padding:20px 0px;}
+.mbox_BombBoxList01{width:810px;border: 1px solid #dcdcdc;padding-left: 10px;padding-top: 10px;}
+.m_list02{ width:793px; }
+.m_list02 li{ width:188px; height:62px; border:1px solid #efefef; float:left; margin-right:8px; margin-bottom:8px;}
+.m_list02 li img{ float:left; display:block; width:60px; height:60px; margin-right:13px; padding-top:1px; padding-left:1px; padding-bottom:1px;}
+.m_list02 li h6{ font-size:14px;font-family:Microsoft YaHei; font-weight:normal; padding-top:16px;}
+.m_list02 li h5{ font-size:14px;font-family:Microsoft YaHei; font-weight:normal; padding-top:5px;}
+.zhiwei{ font-size:12px;font-family:Microsoft YaHei; color:#666; padding-top:12px;}
+.zhiwei a{ color:#666;}
+.zhiwei span{ padding: 0 5px;}
+
+.m_btn01{ width:258px; margin-top:12px; margin-left:575px;}
+.m_btn01L{ float:left;margin: 0 10px;background: #1eb8bb;border-radius: 3px;padding: 0 38px;line-height:32px;border: none;
+cursor: pointer;vertical-align: middle;display: inline-block; color:#fff; font-size:14px;font-family:Microsoft YaHei;}
+.m_btn01R{ float:right;margin: 0 10px;background: #e6e6e6;border-radius: 3px;padding: 0 38px;line-height:32px;border: none;
+cursor: pointer;vertical-align: middle;display: inline-block; color:#a4a4a4; font-size:14px;font-family:Microsoft YaHei;}
+
+.mbox_filter{ margin-bottom:10px; width:820px;}
+.mbox_filter h6 { font-size:14px;float:left; font-weight:normal;}
+.mbox_filter_close01{ float:right; cursor:pointer; background:url(/src/images/close.png) no-repeat; width:9px; height:11px;}
+
+.mbox784_textwrap{ width:820px; height:30px; margin-bottom:10px;}
+.M01text{width:820px;height:28px;line-height:28px;padding:0px;background:url(/src/images/icons_search.png) no-repeat right center;border-radius: 3px;border: 1px solid #dcdcdc;}
+/*筛选弹出框end*/
