@@ -29,3 +29,5 @@ cursor: pointer;vertical-align: middle;display: inline-block; color:#a4a4a4; fon
 .mbox784_textwrap{ width:820px; height:30px; margin-bottom:10px;}
 .M01text{width:820px;height:28px;line-height:28px;padding:0px;background:url(/src/images/icons_search.png) no-repeat right center;border-radius: 3px;border: 1px solid #dcdcdc;}
 /*筛选弹出框end*/
+#textarea{padding-left:0 !important;}
+.text-core .text-wrap .text-focus{-webkit-box-shadow:0px 0px 0px;box-shadow:0px 0px 0px !important;-moz-box-shadow:0px 0px 0px;}

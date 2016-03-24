@@ -19,6 +19,7 @@ var PeopleTitle = React.createClass({
 var PeopleSearch = React.createClass({
   componentDidMount: function() {
     var searchInputNode = ReactDOM.findDOMNode(this.refs.searchtext);
+
     $(searchInputNode).queryIntime({
         func: function(value){
             if(value.length == 0){
@@ -28,11 +29,19 @@ var PeopleSearch = React.createClass({
             }
         }.bind(this)
     });
+
+    $()
+
   },
+  handleChangeValue:function(nameArr){
+    var searchInputNode = ReactDOM.findDOMNode(this.refs.searchtext);
+    $(searchInputNode).value = nameArr;
+  },
+
   render:function(){
     return (
         <div className="mbox784_textwrap">
-          <textarea id="textarea" rows="1" className="M01text" ref = "searchtext"></textarea>
+          <textarea id="textarea" rows="1" className="M01text" ref = "searchtext" ></textarea>
         </div>
     )
   }
@@ -44,7 +53,6 @@ var PeopleLi = React.createClass({
     var peopleLiNode = ReactDOM.findDOMNode(this.refs.myLi);
     var nodeName = $(peopleLiNode).children('h5').html();
     this.props.receive(nodeName);
-    //console.log(nodeName);
   },
   render:function(){
     return (
@@ -66,13 +74,15 @@ var PeopleList = React.createClass({
           this.props.PeoplehandleScroll();
       }
   },
-  fnn:function(){console.log(11111)},
+  ureceives:function(index){
+    this.props.uyreceives(this.props.peopleData[index].Name);
+  },
   render:function(){
-    var LiNode = this.props.peopleData.map(function(peopleData){
+    var LiNode = this.props.peopleData.map(function(peopleData,i){
             return <PeopleLi Avatar = {peopleData.Avatar} name={peopleData.Name} 
-                    Dept ={peopleData.Dept} key = {peopleData.ID} 
-                    receive = {this.props.fnn}></PeopleLi>
-        })
+                    Dept ={peopleData.Dept} key = {i} 
+                    receive = {this.ureceives.bind(this,i)}></PeopleLi>
+        },this)
     return (
         <div className="mbox_BombBoxList01" onScroll = {this.PeopleListScroll} ref = "ListBox">
           <ul className="clearfix m_list02" >
@@ -83,24 +93,34 @@ var PeopleList = React.createClass({
   }
 });
 
-
+var nameArr =[];
 
 var PeopleCon = React.createClass({
-  componentDidMount: function() {
-    var nameArr = [];
-  },
+
   handleReceive:function(name){
-    nameArr.push(name); 
-    console.log(nameArr);
+    if(nameArr.indexOf(name)<0){
+        nameArr.push(name); 
+        console.log(nameArr);
+
+      $('#textarea').textext({
+        plugins : 'tags prompt focus autocomplete ajax arrow',
+        tagsItems : nameArr
+      });
+      $('.text-tags').eq(1).remove();
+      $('.text-prompt').eq(1).remove();
+      $('.text-dropdown').remove();
+
+    }
+
   },
   render:function(){
     return (
       <div className = "mbox784" >
         <PeopleTitle />
-        <PeopleSearch handlePeopleSearchCon = {this.props.handlePeopleSearch} nameData = {this.nameArr}/>
+        <PeopleSearch handlePeopleSearchCon = {this.props.handlePeopleSearch} nameData = {nameArr}/>
         <PeopleList peopleData = {this.props.peopleData} 
         PeoplehandleScroll ={this.props.ConhandleScroll}
-        ureceives = {this.handleReceive}/>
+        uyreceives = {this.handleReceive}/>
       </div>
     )
   }
