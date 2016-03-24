@@ -72,23 +72,23 @@
 	var PeopleSearch = React.createClass({
 	  displayName: 'PeopleSearch',
 
-	  handleKeyDowm: function handleKeyDowm(e) {
-	    if (e.keyCode == 20) {
-
-	      var searchtext = this.refs.searchtext.value;
-	      if (!searchtext) {
-	        return;
-	      } else {
-	        this.props.handlePeopleSearchCon(searchtext);
-	      }
-	    }
-	    return;
+	  componentDidMount: function componentDidMount() {
+	    var searchInputNode = ReactDOM.findDOMNode(this.refs.searchtext);
+	    $(searchInputNode).queryIntime({
+	      func: function (value) {
+	        if (value.length == 0) {
+	          return;
+	        } else {
+	          this.props.handlePeopleSearchCon(value);
+	        }
+	      }.bind(this)
+	    });
 	  },
 	  render: function render() {
 	    return React.createElement(
 	      'div',
 	      { className: 'mbox784_textwrap' },
-	      React.createElement('textarea', { id: 'textarea1', rows: '1', className: 'M01text', ref: 'searchtext', onKeyDown: this.handleKeyDowm })
+	      React.createElement('textarea', { id: 'textarea', rows: '1', className: 'M01text', ref: 'searchtext' })
 	    );
 	  }
 	});
@@ -96,10 +96,17 @@
 	var PeopleLi = React.createClass({
 	  displayName: 'PeopleLi',
 
+	  handleClick: function handleClick(e) {
+	    e.preventDefault();
+	    var peopleLiNode = ReactDOM.findDOMNode(this.refs.myLi);
+	    var nodeName = $(peopleLiNode).children('h5').html();
+	    this.props.receive(nodeName);
+	    //console.log(nodeName);
+	  },
 	  render: function render() {
 	    return React.createElement(
 	      'li',
-	      null,
+	      { onClick: this.handleClick, ref: 'myLi' },
 	      React.createElement(
 	        'a',
 	        { href: '#', target: '_blank' },
@@ -126,14 +133,26 @@
 	var PeopleList = React.createClass({
 	  displayName: 'PeopleList',
 
+	  PeopleListScroll: function PeopleListScroll() {
+	    var scroll_height = ReactDOM.findDOMNode(this.refs.ListBox).scrollHeight;
+	    var win_height = ReactDOM.findDOMNode(this.refs.ListBox).clientHeight;
+	    var scroll_top = ReactDOM.findDOMNode(this.refs.ListBox).scrollTop;
+	    if (scroll_height - win_height - scroll_top == 0 && scroll_top > 0) {
+	      this.props.PeoplehandleScroll();
+	    }
+	  },
+	  fnn: function fnn() {
+	    console.log(11111);
+	  },
 	  render: function render() {
 	    var LiNode = this.props.peopleData.map(function (peopleData) {
 	      return React.createElement(PeopleLi, { Avatar: peopleData.Avatar, name: peopleData.Name,
-	        Dept: peopleData.Dept, key: peopleData.ID });
+	        Dept: peopleData.Dept, key: peopleData.ID,
+	        receive: this.props.fnn });
 	    });
 	    return React.createElement(
 	      'div',
-	      { className: 'mbox_BombBoxList01' },
+	      { className: 'mbox_BombBoxList01', onScroll: this.PeopleListScroll, ref: 'ListBox' },
 	      React.createElement(
 	        'ul',
 	        { className: 'clearfix m_list02' },
@@ -146,13 +165,22 @@
 	var PeopleCon = React.createClass({
 	  displayName: 'PeopleCon',
 
+	  componentDidMount: function componentDidMount() {
+	    var nameArr = [];
+	  },
+	  handleReceive: function handleReceive(name) {
+	    nameArr.push(name);
+	    console.log(nameArr);
+	  },
 	  render: function render() {
 	    return React.createElement(
 	      'div',
 	      { className: 'mbox784' },
 	      React.createElement(PeopleTitle, null),
-	      React.createElement(PeopleSearch, { handlePeopleSearchCon: this.props.handlePeopleSearch }),
-	      React.createElement(PeopleList, { peopleData: this.props.peopleData })
+	      React.createElement(PeopleSearch, { handlePeopleSearchCon: this.props.handlePeopleSearch, nameData: this.nameArr }),
+	      React.createElement(PeopleList, { peopleData: this.props.peopleData,
+	        PeoplehandleScroll: this.props.ConhandleScroll,
+	        ureceives: this.handleReceive })
 	    );
 	  }
 	});
@@ -189,25 +217,20 @@
 	    });
 	  },
 	  handleScroll: function handleScroll() {
-	    var scroll_height = ReactDOM.findDOMNode(this.refs.bomBox).scrollHeight;
-	    var win_height = ReactDOM.findDOMNode(this.refs.bomBox).clientHeight;
-	    var scroll_top = ReactDOM.findDOMNode(this.refs.bomBox).scrollTop;
 	    var oldPeoples = this.state.data;
-	    if (scroll_height - win_height - scroll_top <= 0) {
-	      $.ajax({
-	        url: "pagetwo.json",
-	        dataType: 'json',
-	        cache: false,
-	        data: "",
-	        success: function (data) {
-	          var newPeoples = oldPeoples.concat(data);
-	          this.setState({ data: newPeoples });
-	        }.bind(this),
-	        error: function (xhr, status, err) {
-	          console.error(this.props.url, status, err.toString());
-	        }.bind(this)
-	      });
-	    }
+	    $.ajax({
+	      url: "pagetwo.json",
+	      dataType: 'json',
+	      cache: false,
+	      data: "",
+	      success: function (data) {
+	        var newPeoples = oldPeoples.concat(data);
+	        this.setState({ data: newPeoples });
+	      }.bind(this),
+	      error: function (xhr, status, err) {
+	        console.error(this.props.url, status, err.toString());
+	      }.bind(this)
+	    });
 	  },
 	  getInitialState: function getInitialState() {
 	    return { data: [] };
@@ -218,8 +241,9 @@
 	  render: function render() {
 	    return React.createElement(
 	      'div',
-	      { className: 'mbox_BombBox', onScroll: this.handleScroll, ref: 'bomBox' },
-	      React.createElement(PeopleCon, { peopleData: this.state.data, handlePeopleSearch: this.searchDataFromServer })
+	      { className: 'mbox_BombBox' },
+	      React.createElement(PeopleCon, { peopleData: this.state.data, handlePeopleSearch: this.searchDataFromServer,
+	        ConhandleScroll: this.handleScroll })
 	    );
 	  }
 	});

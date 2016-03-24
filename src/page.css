@@ -1,12 +1,12 @@
 /* CSS Document */
 /*筛选弹出框begin*/
 #content{    
-	overflow: hidden;
+	
 }
-.mbox_BombBox{ background:#fff; width:860px; margin:10px auto;height: 350px;
-    overflow-y: auto;}
+.mbox_BombBox{ background:#fff; width:860px; margin:10px auto;overflow: hidden;}
 .mbox784{ width:820px; margin:0 auto; padding:20px 0px;}
-.mbox_BombBoxList01{width:810px;border: 1px solid #dcdcdc;padding-left: 10px;padding-top: 10px;}
+.mbox_BombBoxList01{width:810px;border: 1px solid #dcdcdc;padding-left: 10px;padding-top: 10px;
+height: 250px;overflow-y: auto;}
 .m_list02{ width:793px; }
 .m_list02 li{ width:188px; height:62px; border:1px solid #efefef; float:left; margin-right:8px; margin-bottom:8px;}
 .m_list02 li img{ float:left; display:block; width:60px; height:60px; margin-right:13px; padding-top:1px; padding-left:1px; padding-bottom:1px;}

@@ -17,31 +17,38 @@ var PeopleTitle = React.createClass({
 });
 
 var PeopleSearch = React.createClass({
-  handleKeyDowm:function(e){
-    if(e.keyCode == 20){
-
-      var searchtext = this.refs.searchtext.value;
-      if(!searchtext){
-        return;
-      }else{
-        this.props.handlePeopleSearchCon(searchtext);
-      }
-    }
-    return;
+  componentDidMount: function() {
+    var searchInputNode = ReactDOM.findDOMNode(this.refs.searchtext);
+    $(searchInputNode).queryIntime({
+        func: function(value){
+            if(value.length == 0){
+                return;
+            }else{
+              this.props.handlePeopleSearchCon(value);
+            }
+        }.bind(this)
+    });
   },
   render:function(){
     return (
         <div className="mbox784_textwrap">
-          <textarea id="textarea1" rows="1" className="M01text" ref = "searchtext"  onKeyDown = {this.handleKeyDowm}></textarea>
+          <textarea id="textarea" rows="1" className="M01text" ref = "searchtext"></textarea>
         </div>
     )
   }
 });
 
 var PeopleLi = React.createClass({
+  handleClick:function(e){
+    e.preventDefault();
+    var peopleLiNode = ReactDOM.findDOMNode(this.refs.myLi);
+    var nodeName = $(peopleLiNode).children('h5').html();
+    this.props.receive(nodeName);
+    //console.log(nodeName);
+  },
   render:function(){
     return (
-        <li>
+        <li onClick = {this.handleClick} ref = "myLi">
           <a href="#" target="_blank"><img src={this.props.Avatar} width="60" height="60" /></a>
           <h5>{this.props.name}</h5>
           <div className="zhiwei"><a href="#" target="_blank">{this.props.Dept}</a></div>
@@ -51,14 +58,24 @@ var PeopleLi = React.createClass({
 })
 
 var PeopleList = React.createClass({
+  PeopleListScroll:function(){
+      var scroll_height = ReactDOM.findDOMNode(this.refs.ListBox).scrollHeight;
+      var  win_height = ReactDOM.findDOMNode(this.refs.ListBox).clientHeight;
+      var scroll_top = ReactDOM.findDOMNode(this.refs.ListBox).scrollTop;
+      if ((scroll_height - win_height - scroll_top) == 0 && scroll_top>0) {
+          this.props.PeoplehandleScroll();
+      }
+  },
+  fnn:function(){console.log(11111)},
   render:function(){
     var LiNode = this.props.peopleData.map(function(peopleData){
             return <PeopleLi Avatar = {peopleData.Avatar} name={peopleData.Name} 
-            Dept ={peopleData.Dept} key = {peopleData.ID}></PeopleLi>
+                    Dept ={peopleData.Dept} key = {peopleData.ID} 
+                    receive = {this.props.fnn}></PeopleLi>
         })
     return (
-        <div className="mbox_BombBoxList01">
-          <ul className="clearfix m_list02">
+        <div className="mbox_BombBoxList01" onScroll = {this.PeopleListScroll} ref = "ListBox">
+          <ul className="clearfix m_list02" >
               {LiNode}
           </ul>
         </div>
@@ -69,12 +86,21 @@ var PeopleList = React.createClass({
 
 
 var PeopleCon = React.createClass({
+  componentDidMount: function() {
+    var nameArr = [];
+  },
+  handleReceive:function(name){
+    nameArr.push(name); 
+    console.log(nameArr);
+  },
   render:function(){
     return (
-      <div className = "mbox784">
+      <div className = "mbox784" >
         <PeopleTitle />
-        <PeopleSearch handlePeopleSearchCon = {this.props.handlePeopleSearch}/>
-        <PeopleList peopleData = {this.props.peopleData}/>
+        <PeopleSearch handlePeopleSearchCon = {this.props.handlePeopleSearch} nameData = {this.nameArr}/>
+        <PeopleList peopleData = {this.props.peopleData} 
+        PeoplehandleScroll ={this.props.ConhandleScroll}
+        ureceives = {this.handleReceive}/>
       </div>
     )
   }
@@ -109,12 +135,8 @@ var PeopleBox = React.createClass({
       }.bind(this)
     });
   },
-  handleScroll:function(){
-      var scroll_height = ReactDOM.findDOMNode(this.refs.bomBox).scrollHeight;
-      var  win_height = ReactDOM.findDOMNode(this.refs.bomBox).clientHeight;
-      var scroll_top = ReactDOM.findDOMNode(this.refs.bomBox).scrollTop;
+  handleScroll:function(){     
       var oldPeoples = this.state.data;
-      if ((scroll_height - win_height - scroll_top) <=0) {
           $.ajax({
             url: "pagetwo.json",
             dataType: 'json',
@@ -128,8 +150,6 @@ var PeopleBox = React.createClass({
               console.error(this.props.url, status, err.toString());
             }.bind(this)
           });
-          
-      }
   },
   getInitialState: function() {
     return {data: []};
@@ -139,8 +159,9 @@ var PeopleBox = React.createClass({
   },
   render: function() {
     return (
-      <div className="mbox_BombBox" onScroll = {this.handleScroll} ref = "bomBox">
-        <PeopleCon peopleData = {this.state.data} handlePeopleSearch = {this.searchDataFromServer}/>
+      <div className="mbox_BombBox" >
+        <PeopleCon peopleData = {this.state.data} handlePeopleSearch = {this.searchDataFromServer} 
+        ConhandleScroll ={this.handleScroll}/>
       </div>
     );
   }
