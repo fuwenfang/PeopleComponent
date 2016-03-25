@@ -75,28 +75,41 @@
 	  componentDidMount: function componentDidMount() {
 	    var searchInputNode = ReactDOM.findDOMNode(this.refs.searchtext);
 
-	    $(searchInputNode).queryIntime({
-	      func: function (value) {
-	        if (value.length == 0) {
-	          return;
-	        } else {
-	          this.props.handlePeopleSearchCon(value);
-	        }
-	      }.bind(this)
-	    });
+	    // $(searchInputNode).queryIntime({
+	    //     func: function(value){
+	    //         if(value.length == 0){
+	    //             return;
+	    //         }else{
+	    //           this.props.handlePeopleSearchCon(value);
+	    //         }
+	    //     }.bind(this)
+	    // });
 
-	    $();
-	  },
-	  handleChangeValue: function handleChangeValue(nameArr) {
-	    var searchInputNode = ReactDOM.findDOMNode(this.refs.searchtext);
-	    $(searchInputNode).value = nameArr;
+	    $(searchInputNode).textext({ plugins: 'tags' });
 	  },
 
+	  handleUp: function handleUp() {
+	    console.log(111);
+	    this.startTimer(this.props.handlePeopleSearchCon(value));
+	  },
+
+	  startTimer: function startTimer(callback) {
+	    this.stopTimer;
+	    timer = setTimeout(function () {
+	      // why delete? it is about high performance?
+	      callback.apply(this).bind(this);
+	    }, 1000);
+	  },
+
+	  stopTimer: function stopTimer() {
+	    clearTimeout(timer);
+	  },
 	  render: function render() {
 	    return React.createElement(
 	      'div',
 	      { className: 'mbox784_textwrap' },
-	      React.createElement('textarea', { id: 'textarea', rows: '1', className: 'M01text', ref: 'searchtext' })
+	      React.createElement('textarea', { id: 'textarea', rows: '1', className: 'M01text', ref: 'searchtext',
+	        onClick: this.handleUp })
 	    );
 	  }
 	});
@@ -104,16 +117,23 @@
 	var PeopleLi = React.createClass({
 	  displayName: 'PeopleLi',
 
+
 	  handleClick: function handleClick(e) {
 	    e.preventDefault();
-	    var peopleLiNode = ReactDOM.findDOMNode(this.refs.myLi);
-	    var nodeName = $(peopleLiNode).children('h5').html();
-	    this.props.receive(nodeName);
+	    var peopleLiNode = ReactDOM.findDOMNode(this.refs.myLiName);
+	    var nodeName = ReactDOM.findDOMNode(this.refs.myLiName).innerHTML;
+	    this.props.ListClick(this.props.index);
+
+	    $('#textarea').val('');
+	    if (!this.props.ckChecked) {
+
+	      $('#textarea').textext()[0].tags().addTags([nodeName]);
+	    };
 	  },
 	  render: function render() {
 	    return React.createElement(
 	      'li',
-	      { onClick: this.handleClick, ref: 'myLi' },
+	      { onClick: this.handleClick, ref: 'myLi', ckChecked: this.props.ckChecked },
 	      React.createElement(
 	        'a',
 	        { href: '#', target: '_blank' },
@@ -121,8 +141,13 @@
 	      ),
 	      React.createElement(
 	        'h5',
-	        null,
+	        { ref: 'myLiName' },
 	        this.props.name
+	      ),
+	      React.createElement(
+	        'p',
+	        { className: 'indexP' },
+	        this.props.index
 	      ),
 	      React.createElement(
 	        'div',
@@ -148,14 +173,12 @@
 	      this.props.PeoplehandleScroll();
 	    }
 	  },
-	  ureceives: function ureceives(index) {
-	    this.props.uyreceives(this.props.peopleData[index].Name);
-	  },
+
 	  render: function render() {
 	    var LiNode = this.props.peopleData.map(function (peopleData, i) {
 	      return React.createElement(PeopleLi, { Avatar: peopleData.Avatar, name: peopleData.Name,
-	        Dept: peopleData.Dept, key: i,
-	        receive: this.ureceives.bind(this, i) });
+	        Dept: peopleData.Dept, index: peopleData.nid, key: i, ckChecked: peopleData.ckChecked,
+	        ListClick: this.props.conClick });
 	    }, this);
 	    return React.createElement(
 	      'div',
@@ -169,35 +192,20 @@
 	  }
 	});
 
-	var nameArr = [];
-
 	var PeopleCon = React.createClass({
 	  displayName: 'PeopleCon',
 
 
-	  handleReceive: function handleReceive(name) {
-	    if (nameArr.indexOf(name) < 0) {
-	      nameArr.push(name);
-	      console.log(nameArr);
-
-	      $('#textarea').textext({
-	        plugins: 'tags prompt focus autocomplete ajax arrow',
-	        tagsItems: nameArr
-	      });
-	      $('.text-tags').eq(1).remove();
-	      $('.text-prompt').eq(1).remove();
-	      $('.text-dropdown').remove();
-	    }
-	  },
 	  render: function render() {
 	    return React.createElement(
 	      'div',
 	      { className: 'mbox784' },
 	      React.createElement(PeopleTitle, null),
-	      React.createElement(PeopleSearch, { handlePeopleSearchCon: this.props.handlePeopleSearch, nameData: nameArr }),
+	      React.createElement(PeopleSearch, { handlePeopleSearchCon: this.props.handlePeopleSearch }),
 	      React.createElement(PeopleList, { peopleData: this.props.peopleData,
 	        PeoplehandleScroll: this.props.ConhandleScroll,
-	        uyreceives: this.handleReceive })
+	        conClick: this.props.boxLIst
+	      })
 	    );
 	  }
 	});
@@ -212,7 +220,13 @@
 	      cache: false,
 	      data: "",
 	      success: function (data) {
-	        this.setState({ data: data });
+	        var mydata = [];
+	        $.each(data, function (i, n) {
+	          n.nid = i;
+	          n.ckChecked = false;
+	          mydata.push(n);
+	        });
+	        this.setState({ data: mydata });
 	      }.bind(this),
 	      error: function (xhr, status, err) {
 	        console.error(this.props.url, status, err.toString());
@@ -226,7 +240,13 @@
 	      cache: false,
 	      data: { text: text },
 	      success: function (data) {
-	        this.setState({ data: data });
+	        var mydata = [];
+	        $.each(data, function (i, n) {
+	          n.nid = i;
+	          n.ckChecked = false;
+	          mydata.push(n);
+	        });
+	        this.setState({ data: mydata });
 	      }.bind(this),
 	      error: function (xhr, status, err) {
 	        console.error(this.props.url, status, err.toString());
@@ -242,7 +262,13 @@
 	      data: "",
 	      success: function (data) {
 	        var newPeoples = oldPeoples.concat(data);
-	        this.setState({ data: newPeoples });
+	        var mydata = [];
+	        $.each(newPeoples, function (i, n) {
+	          n.nid = i;
+	          n.ckChecked = false;
+	          mydata.push(n);
+	        });
+	        this.setState({ data: mydata });
 	      }.bind(this),
 	      error: function (xhr, status, err) {
 	        console.error(this.props.url, status, err.toString());
@@ -255,12 +281,26 @@
 	  componentDidMount: function componentDidMount() {
 	    this.loadDataFromServer();
 	  },
+	  boxhandleClick: function boxhandleClick(index) {
+	    var stateDate = this.state.data;
+	    $.each(stateDate, function (i, n) {
+	      if (i == index) {
+	        stateDate[i].ckChecked = true;
+	        return;
+	      } else {
+	        return;
+	      }
+	    });
+	    this.setState({ data: stateDate });
+	  },
 	  render: function render() {
 	    return React.createElement(
 	      'div',
 	      { className: 'mbox_BombBox' },
-	      React.createElement(PeopleCon, { peopleData: this.state.data, handlePeopleSearch: this.searchDataFromServer,
-	        ConhandleScroll: this.handleScroll })
+	      React.createElement(PeopleCon, { peopleData: this.state.data,
+	        handlePeopleSearch: this.searchDataFromServer,
+	        ConhandleScroll: this.handleScroll,
+	        boxLIst: this.boxhandleClick })
 	    );
 	  }
 	});
