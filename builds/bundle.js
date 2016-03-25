@@ -75,41 +75,53 @@
 	  componentDidMount: function componentDidMount() {
 	    var searchInputNode = ReactDOM.findDOMNode(this.refs.searchtext);
 
-	    // $(searchInputNode).queryIntime({
-	    //     func: function(value){
-	    //         if(value.length == 0){
-	    //             return;
-	    //         }else{
-	    //           this.props.handlePeopleSearchCon(value);
-	    //         }
-	    //     }.bind(this)
-	    // });
-
-	    $(searchInputNode).textext({ plugins: 'tags' });
+	    //$(searchInputNode).textext({ plugins: 'tags' });
 	  },
 
-	  handleUp: function handleUp() {
-	    console.log(111);
-	    this.startTimer(this.props.handlePeopleSearchCon(value));
+	  handleUp: function handleUp(e) {
+
+	    this.startTimer(e);
 	  },
 
-	  startTimer: function startTimer(callback) {
-	    this.stopTimer;
-	    timer = setTimeout(function () {
+	  startTimer: function startTimer(e) {
+	    var searchInputNodeValue = ReactDOM.findDOMNode(this.refs.searchtext).value;
+	    var that = e.target;
+	    clearTimeout(that.timer);
+
+	    that.timer = setTimeout(function () {
+	      delete that.timer;
 	      // why delete? it is about high performance?
-	      callback.apply(this).bind(this);
-	    }, 1000);
-	  },
 
-	  stopTimer: function stopTimer() {
-	    clearTimeout(timer);
+	      this.props.handlePeopleSearchCon(searchInputNodeValue);
+	    }.bind(this), 500);
+	  },
+	  handleTags: function handleTags(e) {
+	    var nameItem = this.props.nameItemData;
+	    var nameThis = this.props.nameItemData[e];
+	    if (nameItem.indexOf(nameThis) >= 0) {
+	      nameItem.splice(nameItem.indexOf(nameThis), 1);
+	    }
+	    this.setState({ item: nameItem });
+	    console.log(this.props.nameItemData);
 	  },
 	  render: function render() {
+	    var nameTags = this.props.nameItemData.map(function (nameItemData, i) {
+	      return React.createElement(
+	        'span',
+	        { ref: 'nameSpan', key: i, onClick: this.handleTags.bind(this, i) },
+	        nameItemData
+	      );
+	    }, this);
 	    return React.createElement(
 	      'div',
 	      { className: 'mbox784_textwrap' },
 	      React.createElement('textarea', { id: 'textarea', rows: '1', className: 'M01text', ref: 'searchtext',
-	        onClick: this.handleUp })
+	        onKeyUp: this.handleUp }),
+	      React.createElement(
+	        'p',
+	        { className: 'dev-tags' },
+	        nameTags
+	      )
 	    );
 	  }
 	});
@@ -127,7 +139,7 @@
 	    $('#textarea').val('');
 	    if (!this.props.ckChecked) {
 
-	      $('#textarea').textext()[0].tags().addTags([nodeName]);
+	      //$('#textarea').textext()[0].tags().addTags([ nodeName ]);
 	    };
 	  },
 	  render: function render() {
@@ -143,11 +155,6 @@
 	        'h5',
 	        { ref: 'myLiName' },
 	        this.props.name
-	      ),
-	      React.createElement(
-	        'p',
-	        { className: 'indexP' },
-	        this.props.index
 	      ),
 	      React.createElement(
 	        'div',
@@ -201,7 +208,7 @@
 	      'div',
 	      { className: 'mbox784' },
 	      React.createElement(PeopleTitle, null),
-	      React.createElement(PeopleSearch, { handlePeopleSearchCon: this.props.handlePeopleSearch }),
+	      React.createElement(PeopleSearch, { handlePeopleSearchCon: this.props.handlePeopleSearch, nameItemData: this.props.nameItemData }),
 	      React.createElement(PeopleList, { peopleData: this.props.peopleData,
 	        PeoplehandleScroll: this.props.ConhandleScroll,
 	        conClick: this.props.boxLIst
@@ -276,13 +283,14 @@
 	    });
 	  },
 	  getInitialState: function getInitialState() {
-	    return { data: [] };
+	    return { data: [], item: [] };
 	  },
 	  componentDidMount: function componentDidMount() {
 	    this.loadDataFromServer();
 	  },
 	  boxhandleClick: function boxhandleClick(index) {
 	    var stateDate = this.state.data;
+	    var stateItem = this.state.item;
 	    $.each(stateDate, function (i, n) {
 	      if (i == index) {
 	        stateDate[i].ckChecked = true;
@@ -291,13 +299,17 @@
 	        return;
 	      }
 	    });
-	    this.setState({ data: stateDate });
+	    if (stateItem.indexOf(stateDate[index].Name) < 0) {
+	      stateItem.push(stateDate[index].Name);
+	    }
+	    this.setState({ data: stateDate, item: stateItem });
+	    console.log(this.state.item);
 	  },
 	  render: function render() {
 	    return React.createElement(
 	      'div',
 	      { className: 'mbox_BombBox' },
-	      React.createElement(PeopleCon, { peopleData: this.state.data,
+	      React.createElement(PeopleCon, { peopleData: this.state.data, nameItemData: this.state.item,
 	        handlePeopleSearch: this.searchDataFromServer,
 	        ConhandleScroll: this.handleScroll,
 	        boxLIst: this.boxhandleClick })

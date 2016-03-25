@@ -20,45 +20,49 @@ var PeopleSearch = React.createClass({
   componentDidMount: function() {
     var searchInputNode = ReactDOM.findDOMNode(this.refs.searchtext);
 
-    // $(searchInputNode).queryIntime({
-    //     func: function(value){
-    //         if(value.length == 0){
-    //             return;
-    //         }else{
-    //           this.props.handlePeopleSearchCon(value);
-    //         }
-    //     }.bind(this)
-    // });
-
-    $(searchInputNode).textext({ plugins: 'tags' });
+    //$(searchInputNode).textext({ plugins: 'tags' });
 
   },
 
-  handleUp :function(){
-    console.log(111);
-    this.startTimer(this.props.handlePeopleSearchCon(value))
+  handleUp :function(e){
+    
+    this.startTimer(e);
   },
 
-  startTimer:function(callback){
-    this.stopTimer;
-        timer = setTimeout(
-            function()
-            {
-                // why delete? it is about high performance?
-                callback.apply(this).bind(this);
-            },
-            1000
-        );
-  },
+  startTimer:function(e){
+    var searchInputNodeValue = ReactDOM.findDOMNode(this.refs.searchtext).value;
+    var that = e.target;
+    clearTimeout(that.timer);
 
-  stopTimer : function(){
-    clearTimeout(timer);
+    that.timer = setTimeout(
+        function()
+        {
+            delete that.timer;
+            // why delete? it is about high performance?
+
+            this.props.handlePeopleSearchCon(searchInputNodeValue);
+        }.bind(this),
+        500
+    );
+  },
+  handleTags:function(e){
+    var nameItem = this.props.nameItemData;
+    var nameThis = this.props.nameItemData[e]
+    if(nameItem.indexOf(nameThis)>=0){
+        nameItem.splice(nameItem.indexOf(nameThis),1);
+    }
+    this.setState({item:nameItem}); 
+    console.log(this.props.nameItemData);
   },
   render:function(){
+      var nameTags = this.props.nameItemData.map(function(nameItemData,i){
+            return <span ref="nameSpan" key = {i}  onClick={this.handleTags.bind(this,i)}>{nameItemData}</span>
+        },this)
     return (
         <div className="mbox784_textwrap">
           <textarea id="textarea" rows="1" className="M01text" ref = "searchtext" 
-          onClick = {this.handleUp}></textarea>
+          onKeyUp = {this.handleUp}></textarea>
+          <p className = "dev-tags">{nameTags}</p>
         </div>
     )
   }
@@ -75,7 +79,7 @@ var PeopleLi = React.createClass({
     $('#textarea').val(''); 
     if (!this.props.ckChecked) {
 
-      $('#textarea').textext()[0].tags().addTags([ nodeName ]);
+      //$('#textarea').textext()[0].tags().addTags([ nodeName ]);
     };    
   },
   render:function(){
@@ -83,7 +87,6 @@ var PeopleLi = React.createClass({
         <li onClick = {this.handleClick} ref = "myLi" ckChecked = {this.props.ckChecked} >
           <a href="#" target="_blank"><img src={this.props.Avatar} width="60" height="60" /></a>
           <h5 ref = "myLiName">{this.props.name}</h5>
-          <p className="indexP">{this.props.index}</p>
           <div className="zhiwei"><a href="#" target="_blank">{this.props.Dept}</a></div>
         </li>
     )
@@ -122,7 +125,7 @@ var PeopleCon = React.createClass({
     return (
       <div className = "mbox784" >
         <PeopleTitle />
-        <PeopleSearch handlePeopleSearchCon = {this.props.handlePeopleSearch} />
+        <PeopleSearch handlePeopleSearchCon = {this.props.handlePeopleSearch}  nameItemData = {this.props.nameItemData}/>
         <PeopleList peopleData = {this.props.peopleData} 
         PeoplehandleScroll ={this.props.ConhandleScroll}
         conClick = {this.props.boxLIst}
@@ -196,13 +199,14 @@ var PeopleBox = React.createClass({
           });
   },
   getInitialState: function() {
-    return {data: []};
+    return {data: [],item:[]};
   },
   componentDidMount: function() {
     this.loadDataFromServer();
   },
   boxhandleClick:function(index){
     var stateDate = this.state.data
+    var stateItem =this.state.item;
     $.each(stateDate,function(i,n){
       if(i==index){
         stateDate[i].ckChecked = true;
@@ -210,13 +214,17 @@ var PeopleBox = React.createClass({
       }else{
         return;
       }     
-    })
-    this.setState({data:stateDate});  
+    });
+    if(stateItem.indexOf(stateDate[index].Name)<0){
+        stateItem.push(stateDate[index].Name);
+    }
+    this.setState({data:stateDate,item:stateItem}); 
+    console.log(this.state.item);
   },
   render: function() {
     return (
       <div className="mbox_BombBox" >
-        <PeopleCon peopleData = {this.state.data} 
+        <PeopleCon peopleData = {this.state.data}  nameItemData = {this.state.item}
         handlePeopleSearch = {this.searchDataFromServer} 
         ConhandleScroll ={this.handleScroll}
         boxLIst = {this.boxhandleClick}/>
