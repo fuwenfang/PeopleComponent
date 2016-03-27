@@ -27,6 +27,12 @@ cursor: pointer;vertical-align: middle;display: inline-block; color:#a4a4a4; fon
 .mbox_filter_close01{ float:right; cursor:pointer; background:url(/src/images/close.png) no-repeat; width:9px; height:11px;}
 
 .mbox784_textwrap{ width:820px; height:30px; margin-bottom:10px; position: relative;}
-.M01text{width:820px;height:28px;line-height:28px;padding:0px;background:url(/src/images/icons_search.png) no-repeat right center;border-radius: 3px;border: 1px solid #dcdcdc;}
+.M01text{width:820px;height:28px;line-height:28px;padding:0px;background:url(/src/images/icons_search.png) no-repeat right center;border-radius: 3px;border: 1px solid #dcdcdc;
+white-space: nowrap;
+    overflow: hidden;
+outline:0;
+resize:none;}
 /*筛选弹出框end*/
-.dev-tags{margin-top:-20px;}
+.dev-tags{ width:820px; height:14px; cursor: text; padding:8px; margin-top:-33px;}
+.nameSpan {border:1px solid #666; padding:3px; margin-right:3px;background: #e5e5e5;}
+
