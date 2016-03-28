@@ -36,3 +36,37 @@ resize:none;}
 .dev-tags{ width:820px; height:14px; cursor: text; padding:8px; margin-top:-33px;}
 .nameSpan {border:1px solid #666; padding:3px; margin-right:3px;background: #e5e5e5;}
 
+.m_btn01R {
+    float: right;
+    margin: 0 10px;
+    background: #e6e6e6;
+    border-radius: 3px;
+    padding: 0 38px;
+    line-height: 32px;
+    border: none;
+    cursor: pointer;
+    vertical-align: middle;
+    display: inline-block;
+    color: #a4a4a4;
+    font-size: 14px;
+    font-family: Microsoft YaHei;
+}
+.m_btn01L {
+    float: left;
+    margin: 0 10px;
+    background: #1eb8bb;
+    border-radius: 3px;
+    padding: 0 38px;
+    line-height: 32px;
+    border: none;
+    cursor: pointer;
+    vertical-align: middle;
+    display: inline-block;
+    color: #fff;
+    font-size: 14px;
+    font-family: Microsoft YaHei;
+}
+.m_btn01 {
+    width: 258px;
+    margin-top: 12px;
+    margin-left: 568px;

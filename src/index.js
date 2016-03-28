@@ -3,7 +3,7 @@
  */
 var React = require('react');
 var ReactDOM = require('react-dom');
-
+var PubSub = require('pubsub-js');
 
 var PeopleTitle = React.createClass({
   render:function(){
@@ -18,10 +18,24 @@ var PeopleTitle = React.createClass({
 
 var PeopleSearch = React.createClass({
   componentDidMount: function() {
-    //var searchInputNode = ReactDOM.findDOMNode(this.refs.searchtext);
-
-    //$(searchInputNode).textext({ plugins: 'tags' });
    
+  },
+  getInitialState: function() {
+    return {
+      value: ''
+    };
+  },
+  componentDidMount: function () {
+    this.pubsub_token = PubSub.subscribe('peoples', function (topic, product) {
+      this.setState({
+        value: product
+      });
+      console.log(product);
+    }.bind(this));
+
+  },
+  componentWillUnmount: function () {
+    PubSub.unsubscribe(this.pubsub_token);
   },
   handleDown:function(e){
     var nameItem = this.props.nameItemData;
@@ -30,15 +44,22 @@ var PeopleSearch = React.createClass({
     var searchInputNodeValue = ReactDOM.findDOMNode(this.refs.searchtext).value;
 
     if(e.keyCode == 8 && searchInputNodeValue.length ==0){
-      console.log(nameItem);
-            console.log(nameitemWidth);
-
-      var newtextareaPadding = 0;
-      newtextareaPadding = this.props.textareaPadding - nameWidthThis.width;
+      
       nameItem.splice(nameItem.length-1,1);
-      nameitemWidth.splice(nameItem.length-1,1);
-      last.splice(nameItem.length-1,1);
+      nameitemWidth.splice(nameitemWidth.length-1,1);
+      last.splice(last.length-1,1);
+      var newtextareaPadding = 0;
+      // for(var i = 0; i<last.length;i++){
+      //   newtextareaPadding +=last[i];
+      // }
+      for(var i = 0; i<nameitemWidth.length;i++){
+        newtextareaPadding +=nameitemWidth[i].width;
+      }
       this.props.hhandleDown(nameItem,nameitemWidth,newtextareaPadding);
+      //console.log(last);
+      console.log(this.props.nameItemData);
+      console.log(this.props.nameitemWidth);
+
     }
 
   },
@@ -71,29 +92,35 @@ var PeopleSearch = React.createClass({
     var nameThis = this.props.nameItemData[e];
     var nameWidthItem = this.props.nameitemWidth;
     var nameWidthThis = this.props.nameitemWidth[e];
-
+  
     if(nameItem.indexOf(nameThis)>=0){
-        console.log(this.props.textareaPadding);
-        var newtextareaPadding = 0;
-        newtextareaPadding = this.props.textareaPadding - nameWidthThis.width;
-
         nameItem.splice(nameItem.indexOf(nameThis),1);
-        nameWidthItem.splice(nameItem.indexOf(nameThis),1);
-
+        nameWidthItem.splice(nameWidthItem.indexOf(nameWidthThis),1);
+        last.splice(e,1);
+        var newtextareaPadding = 0;
+        // for(var i = 0; i<last.length;i++){
+        //   newtextareaPadding +=last[i];
+        // }
+        for(var i = 0; i<nameWidthItem.length;i++){
+          newtextareaPadding +=nameWidthItem[i].width;
+        }
     }
-    last.splice(e,1);
+    
     this.props.hhandleTags(nameItem,nameWidthItem,newtextareaPadding);
+    console.log(this.props.nameitemWidth);
+    console.log(last);
+    console.log(this.props.nameItemData);
   },
+
   render:function(){
       var nameTags = this.props.nameItemData.map(function(nameItemData,i){
             return <span className ="nameSpan" ref="nameSpan" key = {i}  onClick={this.handleTags.bind(this,i)}>{nameItemData}</span>
-        },this)
-
+        },this);
     return (
         <div className="mbox784_textwrap">
           <textarea id="textarea" rows="1" className="M01text" ref = "searchtext" 
-          style={{paddingLeft: (10+this.props.textareaPadding) + 'px'}}
-          onKeyUp = {this.handleUp} onKeyDown = {this.handleDown}></textarea>
+          style={{paddingLeft: (10+this.props.textareaPadding) + 'px'}} 
+          onKeyUp = {this.handleUp} onKeyDown = {this.handleDown} defaultvalue = {this.state.value}></textarea>
           <p className = "dev-tags">{nameTags}</p>
         </div>
     )
@@ -120,6 +147,7 @@ var PeopleLi = React.createClass({
        last.push(itemWidth);
 
     }
+    console.log(last);
 
     var InittextareaPadding = 0;
     for(var i = 0; i<last.length;i++){
@@ -128,6 +156,7 @@ var PeopleLi = React.createClass({
 
     this.props.ListClick(this.props.index,itemWidth,InittextareaPadding);
 
+    PubSub.publish('peoples', '111');
     
   },
   render:function(){
@@ -167,6 +196,19 @@ var PeopleList = React.createClass({
   }
 });
 
+var ConfirmForm = React.createClass({
+  ClickButton:function(){
+      console.log(this.props.nameItemData);
+  },
+  render:function(){
+    return (
+        <div className = "m_btn01 clearfix">
+            <div className="m_btn01L" onClick = {this.ClickButton}>确认</div>
+            <div className="m_btn01R">取消</div>
+        </div>
+      )
+  }
+});
 var PeopleCon = React.createClass({
 
   render:function(){
@@ -179,8 +221,8 @@ var PeopleCon = React.createClass({
         <PeopleList peopleData = {this.props.peopleData} 
         PeoplehandleScroll ={this.props.ConhandleScroll}
         conClick = {this.props.boxLIst}
-        nameItemData = {this.props.nameItemData}
-        />
+        nameItemData = {this.props.nameItemData}/>
+        <ConfirmForm nameItemData = {this.props.nameItemData} />
       </div>
     )
   }
@@ -291,11 +333,7 @@ var PeopleBox = React.createClass({
     // var sumtextareaPadding=InittextareaPadding ;
 
     this.setState({textareaPadding:InittextareaPadding});
-    //console.log($('#textarea').css('paddingLeft'));
-    //console.log(sumtextareaPadding);
-    //console.log(this.state);
-       // alert(this.state.item);
-
+    $('#textarea').val('');
 
   },
   boxhandleTags:function(nameItem,nameWidthItem,newtextareaPadding){
